@@ -19,17 +19,17 @@ def generate_population():
 
 
 def display_population(population):
-    for id, elem in enumerate(population):
-        print(f"{id}: {elem}")
+    for id, element in enumerate(population):
+        print(f"{id}: {element}")
 
 
-def fitness_calculation(population: np.array):
-    fitness_scores = []
+def fitness_calculation(population):
+    scores = []
 
     for individual in population:
-        fitness_scores.append(fn(individual))
+        scores.append(fn(individual))
 
-    return np.array(fitness_scores)
+    return np.array(scores)
 
 
 if __name__ == '__main__':
