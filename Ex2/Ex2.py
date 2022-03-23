@@ -2,7 +2,7 @@ import numpy as np
 import random
 
 
-def fn(x: np.array) -> np.array:
+def fn(x):
     return c + b.T @ x + x.T @ A @ x
 
 
@@ -10,17 +10,12 @@ def generate_population():
     population = []
 
     for _ in range(population_size):
-        individual = np.zeros((d,))
-        for i in range(d):
+        individual = np.zeros((dim,))
+        for i in range(dim):
             individual[i] = random.randint(i - 2 ** d, 2 ** d)
         population.append(individual)
 
     return np.array(population, dtype=np.int64)
-
-
-def display_population(population):
-    for id, element in enumerate(population):
-        print(f"{id}: {element}")
 
 
 def fitness_calculation(population):
@@ -32,57 +27,195 @@ def fitness_calculation(population):
     return np.array(scores)
 
 
+def roulette_wheel(population):
+    scores = fitness_calculation(population)
+
+    if scores.min() != scores.max():
+        scores = (scores - scores.min()) / (scores.max() - scores.min())
+   
+
+    probabilities = scores / scores.sum()
+
+    indices = np.random.choice(population.shape[0], size=population_size, p=probabilities)
+
+    return np.array([population[id] for id in indices])
+
+
+def mutate(c):
+    mutated = np.copy(c)
+    
+    for i, cell in enumerate(mutated):
+        copy_cell = ""
+        for chromosome in cell:
+            if np.random.rand() < mutation_probability:
+                if chromosome == "0":
+                    copy_cell += "1"
+                else:
+                    copy_cell += "0"
+            else:
+                copy_cell += chromosome
+        mutated[i] = copy_cell
+    return mutated
+
+
+def mutation(population):
+    pop = []
+    for individual in population:
+        pop.append(mutate(individual))
+
+    return np.array(pop)    
+
+
+def decimal_to_binary(n):
+    bits = dim + 1
+
+    return np.binary_repr(n, bits)
+
+
+def binary_to_decimal(binary):
+    unsigned = int(binary, 2)
+    if binary[0] == "1":
+        decimal = unsigned - 2**(dim+1)
+        return decimal
+    else:
+        return unsigned
+
+
+def crossover(population):
+    crossed= []
+        
+    for i in range(0, population_size - 1, 2):
+
+        c1 = population[i]
+        c2 = population[i + 1]
+        temp_p1 = ''.join(c1)
+        temp_p2 = ''.join(c2)
+        m = len(c1[0])
+
+        if np.random.rand() < crossover_probability:
+            point = random.randint(1, len(temp_p1) - 2)
+            temp_c1 = temp_p1[:point] + temp_p2[point:]
+            temp_c2 = temp_p2[:point] + temp_p1[point:]
+            for i in range(0, len(temp_p1) - m + 1, m):
+                np.append(c1, temp_c1[i:i + m])
+                np.append(c2, temp_c2[i:i + m])
+
+        crossed += [c1, c2]
+
+    return np.array(crossed)
+
+
+def to_gray_mod(num_i, shift, bit_len) -> str:
+    num_i = num_i + shift
+    num_i = num_i ^ (num_i >> 1)  
+    x_b = format(num_i, bit_len+'b')   
+    return x_b
+
+
+def to_gray(matrix):
+    pop_b = []
+    for i in range(population_size):
+        for j in range(dim):
+            pop_b.append(to_gray_mod(matrix[i][j], -(j - 2 ** d) - 1, '0' + str((2 ** d) // 2)))
+    pop_b = np.array(pop_b).reshape(population_size, dim)
+    return np.array(pop_b)
+
+
+def inverse_gray_mod(binary, shift):  
+    num_i = int(binary, 2)
+    inv = 0
+    while num_i:
+        inv = inv ^ num_i
+        num_i = num_i >> 1
+
+    return inv - shift
+
+
+def to_decimal(matrix):
+    pop_b = []
+    for i in range(population_size):
+        for j in range(dim):
+            pop_b.append(inverse_gray_mod(matrix[i][j], -(j - 2 ** d) - 1))
+    pop_b = np.array(pop_b).reshape(population_size, dim)
+    
+    return np.array(pop_b)
+
+
+def replacement(crossed, mutated):
+    n = len(mutated)
+    return np.concatenate((mutated, crossed[n:]))
+
+
+def fittest_individual(population):
+    max_value = np.max(fitness_calculation(population))
+    best = np.where(max_value == fitness_calculation(population))[0][0]
+    return population[best], max_value
+
+
+def generic_algorithm(population):
+    best_overall_individual = population[0]
+    best_overall_score = fn(best_overall_individual)
+
+    for _ in range(iterations):        
+        s_pop = roulette_wheel(population)
+        b_pop = to_gray(s_pop)
+        c_pop = crossover(b_pop)
+        m_pop = mutation(c_pop)
+        final = replacement(to_decimal(c_pop), to_decimal(m_pop))
+
+        best_iteration_individual, best_iteration_score = fittest_individual(
+                final)
+        if best_iteration_score > best_overall_score:
+                best_overall_individual = best_iteration_individual
+                best_overall_score = best_iteration_score
+
+    print(
+        f"Best: {best_overall_individual} Score: {best_overall_score}")
+
+
+
 if __name__ == '__main__':
 
-    d = int(input("Enter the number of dimensions - d: "))
-    while d < 1:
-        d = int(input("Dimension must be greater than 0. Enter new number of dimensions - d: "))
+    dim = int(input("Enter the number of dimensions - dim: "))
+    while dim < 1:
+        dim = int(input("Dimension must be greater than 0. Enter new number of dimensions - dim: "))
 
     c = float(input("Enter the constant - c: "))
 
-    nums_b = list(map(int, input(f'Enter {d} numbers for vector b separated by space: ').split()))
+    nums_b = list(map(int, input(f'Enter {dim} numbers for vector b separated by space: ').split()))
     b = np.array(nums_b)
-    while b.size != d:
-        nums_b = list(map(int, input(f'Incorrect input. Enter {d} numbers separated by space: ').split()))
+    while b.size != dim:
+        nums_b = list(map(int, input(f'Incorrect input. Enter {dim} numbers separated by space: ').split()))
         b = np.array(nums_b)
 
     nums_A = list(
-        map(int, input(f'Enter {d * d} numbers for matrix A in starting from top left to bottom right: ').split()))
-    while len(nums_A) != d * d:
-        nums_A = list(map(int, input(f'Incorrect input. Enter {d * d} numbers separated by space: ').split()))
-    A = np.array(nums_A).reshape(d, d)
+        map(int, input(f'Enter {dim * dim} numbers for matrix A in starting from top left to bottom right: ').split()))
+    while len(nums_A) != dim * dim:
+        nums_A = list(map(int, input(f'Incorrect input. Enter {dim * dim} numbers separated by space: ').split()))
+    A = np.array(nums_A).reshape(dim, dim)
+
+    d = int(input("Enter the number for range - d: "))
+    while d < 1:
+        d = int(input("Range must be greater than 0. Enter new number for d - d: "))
 
     population_size = int(input("Enter the population size: "))
     while population_size < 2:
         population_size = int(input("Population size has to be greater than 2. Enter new population size: "))
 
-    crossover_prob = float(input("Enter the crossover probability: "))
-    while crossover_prob < 0 or crossover_prob > 1:
-        crossover_prob = float(
+    crossover_probability = float(input("Enter the crossover probability: "))
+    while crossover_probability < 0 or crossover_probability > 1:
+        crossover_probability = float(
             input("Crossover probability has to be between 0 and 1. Enter new crossover probability: "))
 
-    mutation_prob = float(input("Enter the mutation probability: "))
-    while mutation_prob < 0 or mutation_prob > 1:
-        mutation_prob = float(input("Mutation probability has to be between 0 and 1. Enter new mutation probability: "))
+    mutation_probability = float(input("Enter the mutation probability: "))
+    while mutation_probability < 0 or mutation_probability  > 1:
+        mutation_probability  = float(input("Mutation probability has to be between 0 and 1. Enter new mutation probability: "))
 
     iterations = int(input("Enter the number of iterations: "))
     while iterations <= 0:
         iterations = int(input("Iterations must be greater than 0. Enter new number of iterations: "))
 
-    """
-    # Testing
-    d = 3
-    A = [[-2, 1, 0], [1, -2, 1], [0, 1, -2]]
-    b = [-14, 14, -2]
-    c = -23.5
-    population_size = 50
-    crossover_probability = 0.9
-    mutation_probability = 0.05
-    iterations = 1000
-    A = np.array(A).reshape(3, 3)
-    b = np.array(b)
-    """
-
-    pop = generate_population()
-    display_population(pop)
-    print(fitness_calculation(pop))
+ 
+    population = generate_population()
+  
+    generic_algorithm(population)
