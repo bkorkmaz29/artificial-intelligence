@@ -27,6 +27,11 @@ def fitness_calculation(population):
     return np.array(scores)
 
 
+def display_population(population):
+    for i, e in enumerate(population):
+        print(f"{i+1}: {e} = {fn(e)}")
+
+
 def roulette_wheel(population):
     scores = fitness_calculation(population)
 
@@ -38,32 +43,31 @@ def roulette_wheel(population):
 
     indices = np.random.choice(population.shape[0], size=population_size, p=probabilities)
 
-    return np.array([population[id] for id in indices])
+    return np.array([population[i] for i in indices])
 
-
-def mutate(c):
-    mutated = np.copy(c)
+def mutate(ind):
+    individiual = np.copy(ind)
     
-    for i, cell in enumerate(mutated):
-        copy_cell = ""
+    for i, cell in enumerate(individiual):
+        new_cell = ""
         for chromosome in cell:
             if np.random.rand() < mutation_probability:
                 if chromosome == "0":
-                    copy_cell += "1"
+                    new_cell += "1"
                 else:
-                    copy_cell += "0"
+                    new_cell += "0"
             else:
-                copy_cell += chromosome
-        mutated[i] = copy_cell
-    return mutated
+                new_cell += chromosome
+        individiual[i] = new_cell
+    return individiual
 
 
 def mutation(population):
-    pop = []
+    m_pop = []
     for individual in population:
-        pop.append(mutate(individual))
+        m_pop.append(mutate(individual))
 
-    return np.array(pop)    
+    return np.array(m_pop)    
 
 
 def decimal_to_binary(n):
@@ -91,7 +95,6 @@ def crossover(population):
         temp_p1 = ''.join(c1)
         temp_p2 = ''.join(c2)
         m = len(c1[0])
-
         if np.random.rand() < crossover_probability:
             point = random.randint(1, len(temp_p1) - 2)
             temp_c1 = temp_p1[:point] + temp_p2[point:]
@@ -152,30 +155,36 @@ def fittest_individual(population):
     return population[best], max_value
 
 
-def generic_algorithm(population):
+def genetic_algorithm():
+    population = generate_population()
+
     best_overall_individual = population[0]
     best_overall_score = fn(best_overall_individual)
+    final_population = population
 
     for _ in range(iterations):        
         s_pop = roulette_wheel(population)
         b_pop = to_gray(s_pop)
         c_pop = crossover(b_pop)
         m_pop = mutation(c_pop)
-        final = replacement(to_decimal(c_pop), to_decimal(m_pop))
+        r_pop = replacement(to_decimal(c_pop), to_decimal(m_pop))
+
 
         best_iteration_individual, best_iteration_score = fittest_individual(
-                final)
+                r_pop)
         if best_iteration_score > best_overall_score:
                 best_overall_individual = best_iteration_individual
                 best_overall_score = best_iteration_score
-
+                final_population = r_pop
+    print("\nFinal Population\n----------------------------------")
+    display_population(final_population)
     print(
-        f"Best: {best_overall_individual} Score: {best_overall_score}")
+        f"\nBest: {best_overall_individual} Score: {best_overall_score}")
 
 
 
 if __name__ == '__main__':
-
+    
     dim = int(input("Enter the number of dimensions - dim: "))
     while dim < 1:
         dim = int(input("Dimension must be greater than 0. Enter new number of dimensions - dim: "))
@@ -199,8 +208,8 @@ if __name__ == '__main__':
         d = int(input("Range must be greater than 0. Enter new number for d - d: "))
 
     population_size = int(input("Enter the population size: "))
-    while population_size < 2:
-        population_size = int(input("Population size has to be greater than 2. Enter new population size: "))
+    while population_size < 2 or population_size % 2 != 0:
+        population_size = int(input("Population size has to be greater than 2 and an even number. Enter new population size: "))
 
     crossover_probability = float(input("Enter the crossover probability: "))
     while crossover_probability < 0 or crossover_probability > 1:
@@ -215,7 +224,5 @@ if __name__ == '__main__':
     while iterations <= 0:
         iterations = int(input("Iterations must be greater than 0. Enter new number of iterations: "))
 
- 
-    population = generate_population()
-  
-    generic_algorithm(population)
+    genetic_algorithm()
+    
