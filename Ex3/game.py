@@ -103,15 +103,15 @@ class Game:
     def draw_figure(self, row, col):
         if self.player == 1:
             diag_down_start = (col * SQUARE_SIZE + OFFSET,
-                          row * SQUARE_SIZE + OFFSET)
+                               row * SQUARE_SIZE + OFFSET)
             diag_down_end = (col * SQUARE_SIZE + SQUARE_SIZE - OFFSET,
-                        row * SQUARE_SIZE + SQUARE_SIZE - OFFSET)
+                             row * SQUARE_SIZE + SQUARE_SIZE - OFFSET)
             pygame.draw.line(screen, CROSS_COLOR, diag_down_start,
                              diag_down_end, CROSS_WIDTH)
             diag_up_start = (col * SQUARE_SIZE + OFFSET, row *
-                         SQUARE_SIZE + SQUARE_SIZE - OFFSET)
+                             SQUARE_SIZE + SQUARE_SIZE - OFFSET)
             diag_up_end = (col * SQUARE_SIZE + SQUARE_SIZE -
-                       OFFSET, row * SQUARE_SIZE + OFFSET)
+                           OFFSET, row * SQUARE_SIZE + OFFSET)
             pygame.draw.line(screen, CROSS_COLOR, diag_up_start,
                              diag_up_end, CROSS_WIDTH)
 
