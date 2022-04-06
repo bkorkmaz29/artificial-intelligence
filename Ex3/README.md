@@ -14,9 +14,9 @@ pip install pygame
 pip install numpy
 ```
 ## How To Play
-Run the main file using python
+- Run the main file using python
 ```sh
 python3 main.py
 ```
-To start second press 's'
-To restart the game press 'r'
+- To start second press ```S```
+- To restart the game press ```R```
