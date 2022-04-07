@@ -6,8 +6,8 @@ from constants import *
 '''
  Tic-Tac-Toe game with minimax (alpha-beta pruning) AI
 
- Press s for play second
- Press r for restart the game
+ Press s for playing second
+ Press r for restarting the game
 '''
 
 if __name__ == '__main__':
@@ -43,6 +43,7 @@ if __name__ == '__main__':
                     board = game.board
                     ai = game.ai
 
+            # Mouse click event for making a move
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
                 row = pos[1] // SQUARE_SIZE
@@ -54,6 +55,7 @@ if __name__ == '__main__':
                     if game.is_finished():
                         game.running = False
 
+        # Ai makes a move if its turn
         if game.player == ai.player and game.running:
             pygame.display.update()
             row, col = ai.evaluate(board, max, player_start)

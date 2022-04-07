@@ -1,5 +1,7 @@
 import copy
 
+from numpy import Infinity
+
 
 class AI:
 
@@ -9,7 +11,7 @@ class AI:
     # Minimax algorithm with alpha-beta pruning if player starts first
     def minimax_ab_1(self, board, maximizing, alpha, beta):
 
-        # End of game
+        # End of game state in visual board
         state = board.final_state()
 
         # Player 1 wins
@@ -25,7 +27,7 @@ class AI:
             return 0, None
 
         if maximizing:
-            max_score = -100
+            max_score = -Infinity
             best_move = None
             empty_squares = board.get_empty()  # Get available squares to make a move
 
@@ -33,24 +35,24 @@ class AI:
                 # Copy board to make it mutable
                 copy_board = copy.deepcopy(board)
                 copy_board.fill(row, col, 1)
-                score = self.minimax_ab_1(copy_board, False, alpha, beta)[
-                    0]  # Evaluate min for ai move
+                score = self.minimax_ab_1(copy_board, False, alpha, beta)[0]  # Evaluate min for ai move
 
-                if score > max_score:  # If the evaluation is better than previous best, it becomes new best
+                # If the evaluation is better than previous best, it becomes new best
+                if score > max_score:
                     max_score = score
                     best_move = (row, col)
 
                 # Alpha-Beta pruning
-                if max_score >= beta:  # If the best evaluation greater or equal than beta it is the best move
+                if max_score >= beta:
                     return max_score, best_move
 
-                if max_score > alpha:  # If the best evaluation greater than alpha it becomes new alpha
+                if max_score > alpha:
                     alpha = max_score
 
             return max_score, best_move
 
         else:
-            min_score = 100
+            min_score = Infinity
             best_move = None
             empty_squares = board.get_empty()
 
@@ -133,6 +135,7 @@ class AI:
     def evaluate(self, main_board, max, start):
         if start == 1:
             score, move = self.minimax_ab_1(main_board, max, -100, 100)
+
         elif start == 2:
             score, move = self.minimax_ab_2(main_board, max, -100, 100)
 
