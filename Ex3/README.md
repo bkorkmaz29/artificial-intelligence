@@ -22,5 +22,5 @@ pip install numpy
 ```sh
 python3 main.py
 ```
-- To start second press ```S```
-- To restart the game press ```R```
+- To start second, press ```S```
+- To restart the game, press ```R```
