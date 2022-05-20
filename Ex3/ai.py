@@ -31,7 +31,7 @@ class AI:
             best_move = None
             empty_squares = board.get_empty()  # Get available squares to make a move
 
-            for (row, col) in empty_squares:
+            for (row, col) in empty_squares: # Iterate through all available moves
                 # Copy board to make it mutable
                 copy_board = copy.deepcopy(board)
                 copy_board.fill(row, col, 1)
