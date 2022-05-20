@@ -44,12 +44,13 @@ class AI:
 
                 # Alpha-Beta pruning
                 # If max score is not smaller than beta, doesn't check other options
+                '''
                 if max_score >= beta:
                     return max_score, best_move
 
                 if max_score > alpha:
                     alpha = max_score
-
+                '''
             return max_score, best_move
 
         else:
@@ -65,13 +66,13 @@ class AI:
                 if score < min_score:
                     min_score = score
                     best_move = (row, col)
-
+                '''
                 if min_score <= alpha:
                     return min_score, best_move
 
                 if min_score < beta:
                     beta = min_score
-
+                    '''
             return min_score, best_move
 
     # Minimax algorithm with alpha-beta pruning if player starts second
