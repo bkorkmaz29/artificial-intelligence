@@ -107,7 +107,7 @@ class Game:
         pygame.draw.line(screen, LINE_COLOR, (0, HEIGHT),
                          (WIDTH, HEIGHT), LINE_WIDTH)
 
-    # Draws the circle or X
+    # Draws the circle or cross
     def draw_figure(self, row, col):
         if self.player == 1:
             diag_down_start = (col * SQUARE_SIZE + OFFSET,
